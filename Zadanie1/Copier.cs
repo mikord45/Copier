@@ -9,45 +9,87 @@ namespace ver1
         public int PrintCounter = 0;
 
         public int ScanCounter = 0;
+
+        public new int Counter = 0;
+        public new void PowerOn()
+        {
+            if(state == IDevice.State.off)
+            {
+                Counter += 1;
+                state = IDevice.State.on;
+                Console.WriteLine("Device is on ...");
+            }
+        }
+
+        public new void PowerOff()
+        {
+            if (state == IDevice.State.on)
+            {
+                state = IDevice.State.off;
+                Console.WriteLine("... Device is off !");
+            }
+        }
         public void Print(in IDocument document)
         {
-            Console.WriteLine(DateTime.Now.ToString() + " Print: " + document.GetFileName());
+            if(state == IDevice.State.on)
+            {
+                PrintCounter += 1;
+                Console.WriteLine(DateTime.Now.ToString() + " Print: " + document.GetFileName());
+            }
         }
 
         public void Scan(out IDocument document, IDocument.FormatType formatType)
         {
-            Console.WriteLine(formatType);
-            switch (formatType)
+            if(state == IDevice.State.on)
             {
-                case IDocument.FormatType.PDF:
-                    Console.WriteLine(DateTime.Now.ToString() + " Scan: " + "PDFScan" + Counter + ".pdf");
-                    document = new PDFDocument("PDFScan" + Counter + ".pdf");
-                    break;
-                case IDocument.FormatType.JPG:
-                    Console.WriteLine(DateTime.Now.ToString() + " Scan: " + "ImageScan" + Counter + ".jpg");
-                    document = new ImageDocument("ImageScan" + Counter + ".jpg");
-                    break;
-                case IDocument.FormatType.TXT:
-                    Console.WriteLine(DateTime.Now.ToString() + " Scan: " + "TextScan" + Counter + ".txt");
-                    document = new TextDocument("TextScan" + Counter + ".txt");
-                    break;
-                default:
-                    document = null;
-                    break;
+                ScanCounter += 1;
+                switch (formatType)
+                {
+                    case IDocument.FormatType.PDF:
+                        Console.WriteLine(DateTime.Now.ToString() + " Scan: " + "PDFScan" + ScanCounter + ".pdf");
+                        document = new PDFDocument("PDFScan" + ScanCounter + ".pdf");
+                        break;
+                    case IDocument.FormatType.JPG:
+                        Console.WriteLine(DateTime.Now.ToString() + " Scan: " + "ImageScan" + ScanCounter + ".jpg");
+                        document = new ImageDocument("ImageScan" + ScanCounter + ".jpg");
+                        break;
+                    case IDocument.FormatType.TXT:
+                        Console.WriteLine(DateTime.Now.ToString() + " Scan: " + "TextScan" + ScanCounter + ".txt");
+                        document = new TextDocument("TextScan" + ScanCounter + ".txt");
+                        break;
+                    default:
+                        document = null;
+                        break;
+                }
+            }
+            else
+            {
+                document = null;
             }
         }
 
         public void Scan(out IDocument document)
         {
-            Console.WriteLine(DateTime.Now.ToString() + " Scan: " + "ImageScan" + Counter + ".jpg");
-            document = new ImageDocument("ImageScan" + Counter + ".jpg");
+            if(state == IDevice.State.on)
+            {
+                ScanCounter += 1;
+                Console.WriteLine(DateTime.Now.ToString() + " Scan: " + "ImageScan" + ScanCounter + ".jpg");
+                document = new ImageDocument("ImageScan" + ScanCounter + ".jpg");
+            }
+            else
+            {
+                document = null;
+            }
         }
 
         public void ScanAndPrint()
         {
-            IDocument doc = new ImageDocument("image.img");
-            Scan(out doc);
-            Print(doc);
+            if(state == IDevice.State.on)
+            {
+                IDocument doc;
+                Scan(out doc);
+                Print(doc);
+            }
         }
     }
 }

@@ -1,11 +1,11 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ver2;
+using ver3;
 using System;
 using System.IO;
 
-namespace ver2UnitTests
-{
+namespace ver3UnitTests
 
+{
     public class ConsoleRedirectionToStringWriter : IDisposable
     {
         private StringWriter stringWriter;
@@ -91,6 +91,26 @@ namespace ver2UnitTests
             Assert.AreEqual(currentConsoleOut, Console.Out);
         }
 
+        // weryfikacja, czy po wywo³aniu metody `Print`` w napisie NIE pojawia siê s³owo `Print`, jezeli Copier jest w³¹czony, ale Printer nie 
+        // wymagane przekierowanie konsoli do strumienia StringWriter
+        [TestMethod]
+        public void Copier_Print_DeviceOn_PrinterOff()
+        {
+            var copier = new Copier();
+            copier.PowerOn();
+            copier.PowerOffPrinter();
+
+            var currentConsoleOut = Console.Out;
+            currentConsoleOut.Flush();
+            using (var consoleOutput = new ConsoleRedirectionToStringWriter())
+            {
+                IDocument doc1 = new PDFDocument("aaa.pdf");
+                copier.Print(in doc1);
+                Assert.IsFalse(consoleOutput.GetOutput().Contains("Print"));
+            }
+            Assert.AreEqual(currentConsoleOut, Console.Out);
+        }
+
         // weryfikacja, czy po wywo³aniu metody `Scan` i wy³¹czonej kopiarce w napisie NIE pojawia siê s³owo `Scan`
         // wymagane przekierowanie konsoli do strumienia StringWriter
         [TestMethod]
@@ -98,6 +118,26 @@ namespace ver2UnitTests
         {
             var copier = new Copier();
             copier.PowerOff();
+
+            var currentConsoleOut = Console.Out;
+            currentConsoleOut.Flush();
+            using (var consoleOutput = new ConsoleRedirectionToStringWriter())
+            {
+                IDocument doc1;
+                copier.Scan(out doc1);
+                Assert.IsFalse(consoleOutput.GetOutput().Contains("Scan"));
+            }
+            Assert.AreEqual(currentConsoleOut, Console.Out);
+        }
+
+        // weryfikacja, czy po wywo³aniu metody `Scan` i w³¹czonej kopiarce w napisie NIE pojawia siê s³owo `Scan`, je¿eli Scanner nie jest w³¹czony
+        // wymagane przekierowanie konsoli do strumienia StringWriter
+        [TestMethod]
+        public void Copier_Scan_DeviceOn_ScannerOff()
+        {
+            var copier = new Copier();
+            copier.PowerOn();
+            copier.PowerOffScanner();
 
             var currentConsoleOut = Console.Out;
             currentConsoleOut.Flush();
@@ -198,6 +238,26 @@ namespace ver2UnitTests
             Assert.AreEqual(currentConsoleOut, Console.Out);
         }
 
+        // weryfikacja, czy po wywo³aniu metody `ScanAndPrint` i w³¹czonej kopiarce w napisie NIE pojawia siê s³owo `Print`, ale pojawi siê s³owo `Scan`, jezeli Printer jest wy³¹czony
+        // wymagane przekierowanie konsoli do strumienia StringWriter
+        [TestMethod]
+        public void Copier_ScanAndPrint_DeviceOn_PrinteOff()
+        {
+            var copier = new Copier();
+            copier.PowerOn();
+            copier.PowerOffPrinter();
+
+            var currentConsoleOut = Console.Out;
+            currentConsoleOut.Flush();
+            using (var consoleOutput = new ConsoleRedirectionToStringWriter())
+            {
+                copier.ScanAndPrint();
+                Assert.IsTrue(consoleOutput.GetOutput().Contains("Scan"));
+                Assert.IsFalse(consoleOutput.GetOutput().Contains("Print"));
+            }
+            Assert.AreEqual(currentConsoleOut, Console.Out);
+        }
+
         [TestMethod]
         public void Copier_PrintCounter()
         {
@@ -222,6 +282,23 @@ namespace ver2UnitTests
             // 5 wydruków, gdy urz¹dzenie w³¹czone
             Assert.AreEqual(5, copier.PrintCounter);
         }
+        [TestMethod]
+        public void Copier_Printer_And_Scanner_Counter()
+        {
+            var copier = new Copier();
+            copier.PowerOn();
+            copier.PowerOff();
+            copier.PowerOn();
+            copier.PowerOnPrinter();
+            copier.PowerOnScanner();
+            copier.PowerOffPrinter();
+            copier.PowerOffScanner();
+            copier.PowerOnPrinter();
+            copier.PowerOnScanner();
+            Assert.AreEqual(3, copier.PrinterCounter);
+            Assert.AreEqual(3, copier.ScannerCounter);
+        }
+
 
         [TestMethod]
         public void Copier_ScanCounter()
@@ -292,7 +369,7 @@ namespace ver2UnitTests
         [TestMethod]
         public void Copier_Fax_DeviceOn()
         {
-            var multiDevice = new MultifunctionalDevice();
+            var multiDevice = new MultidimensionalDevice();
             multiDevice.PowerOn();
 
             var currentConsoleOut = Console.Out;
@@ -311,7 +388,7 @@ namespace ver2UnitTests
         [TestMethod]
         public void Copier_ScanAndPrint_DeviceOff()
         {
-            var multiDevice = new MultifunctionalDevice();
+            var multiDevice = new MultidimensionalDevice();
 
             var currentConsoleOut = Console.Out;
             currentConsoleOut.Flush();
@@ -327,7 +404,7 @@ namespace ver2UnitTests
         [TestMethod]
         public void Copier_FaxCounter()
         {
-            var multiDevice = new MultifunctionalDevice();
+            var multiDevice = new MultidimensionalDevice();
             multiDevice.PowerOn();
 
             IDocument doc1 = new PDFDocument("aaa.pdf");
@@ -345,6 +422,24 @@ namespace ver2UnitTests
             // 3 faxy
             Assert.AreEqual(3, multiDevice.FaxCounter);
         }
+
+        [TestMethod]
+        public void Copier_FaxMachineCounter()
+        {
+            var multiDevice = new MultidimensionalDevice();
+            multiDevice.PowerOn();
+            multiDevice.PowerOffFaxMachine();
+            multiDevice.PowerOn();
+            multiDevice.PowerOn();
+            multiDevice.PowerOnFaxMachine();
+            multiDevice.PowerOff();
+            multiDevice.PowerOn();
+            multiDevice.PowerOffFaxMachine();
+            multiDevice.PowerOnFaxMachine();
+            multiDevice.PowerOnFaxMachine();
+
+            // 3 w³¹czenia faksu
+            Assert.AreEqual(4, multiDevice.FaxMachineCounter);
+        }
     }
 }
-

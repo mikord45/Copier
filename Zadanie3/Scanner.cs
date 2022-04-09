@@ -2,26 +2,14 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ver1
+namespace ver3
 {
-    public class Copier : BaseDevice, IPrinter, IScanner
+    class Scanner: BaseDevice, IScanner
     {
-        public int PrintCounter = 0;
-
         public int ScanCounter = 0;
-
-        public void Print(in IDocument document)
-        {
-            if(state == IDevice.State.on)
-            {
-                PrintCounter += 1;
-                Console.WriteLine(DateTime.Now.ToString() + " Print: " + document.GetFileName());
-            }
-        }
-
         public void Scan(out IDocument document, IDocument.FormatType formatType)
         {
-            if(state == IDevice.State.on)
+            if (state == IDevice.State.on)
             {
                 ScanCounter += 1;
                 switch (formatType)
@@ -51,7 +39,7 @@ namespace ver1
 
         public void Scan(out IDocument document)
         {
-            if(state == IDevice.State.on)
+            if (state == IDevice.State.on)
             {
                 ScanCounter += 1;
                 Console.WriteLine(DateTime.Now.ToString() + " Scan: " + "ImageScan" + ScanCounter + ".jpg");
@@ -60,16 +48,6 @@ namespace ver1
             else
             {
                 document = null;
-            }
-        }
-
-        public void ScanAndPrint()
-        {
-            if(state == IDevice.State.on)
-            {
-                IDocument doc;
-                Scan(out doc);
-                Print(doc);
             }
         }
     }

@@ -1,6 +1,6 @@
 using System;
 
-namespace ver1
+namespace ver3
 {
     public interface IDevice
     {
@@ -38,7 +38,7 @@ namespace ver1
             }
         }
 
-        public int Counter { get; private set; } = 0;
+        public int Counter { get; set; } = 0;
     }
 
     public interface IPrinter : IDevice
@@ -57,4 +57,9 @@ namespace ver1
         void Scan(out IDocument document, IDocument.FormatType formatType);
     }
 
+    public interface IFax : IDevice
+    {
+        int FaxCounter { get; set; }
+        void Fax(out IDocument document);
+    }
 }

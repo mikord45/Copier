@@ -18,6 +18,23 @@ namespace ver3
             System.Console.WriteLine(xerox.Counter);
             System.Console.WriteLine(xerox.PrintCounter);
             System.Console.WriteLine(xerox.ScanCounter);
+
+            var multiMachine = new MultidimensionalDevice();
+            multiMachine.PowerOn();
+            IDocument doc3 = new PDFDocument("aaa.pdf");
+            multiMachine.Print(in doc3);
+
+            IDocument doc4;
+            multiMachine.Scan(out doc4);
+
+            multiMachine.ScanAndPrint();
+            System.Console.WriteLine(multiMachine.Counter);
+            System.Console.WriteLine(multiMachine.PrintCounter);
+            System.Console.WriteLine(multiMachine.ScanCounter);
+            System.Console.WriteLine(multiMachine.FaxCounter);
+            IDocument doc5 = new PDFDocument("aaa.pdf");
+            multiMachine.Fax(out doc5);
+            System.Console.WriteLine(multiMachine.FaxCounter);
         }
     }
 }
